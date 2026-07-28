@@ -1,0 +1,41 @@
+# ==========================================
+#  Hassas Veriler & API Anahtarları (KRİTİK)
+# ==========================================
+.env
+.env.*
+*.env
+
+# ==========================================
+# Python & Sanal Ortam (Virtual Environment)
+# ==========================================
+.venv/
+venv/
+ENV/
+env/
+pythonenv/
+
+# Python Derleme ve Önbellek Dosyaları
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ==========================================
+# IDE & Editör Ayarları (PyCharm / VS Code)
+# ==========================================
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ==========================================
+#  Test, Coverage ve Log Dosyaları
+# ==========================================
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS Tarafından Oluşturulan Geçici Dosyalar
+.DS_Store
+Thumbs.db

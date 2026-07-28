@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecurityScanner - Tehdit Analiz Portalı</title>
+
+    <!-- Tailwind CSS (Eksiksiz Basit CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background-color: #020617;
+            color: #f8fafc;
+        }
+        .card-bg {
+            background-color: #0f172a;
+            border-color: #1e293b;
+        }
+        .input-bg {
+            background-color: #020617;
+            border-color: #1e293b;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased">
+
+    <!-- Header / Üst Bar -->
+    <header class="border-b border-slate-800 bg-slate-900/50 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-blue-600/20 text-blue-500 rounded-lg border border-blue-500/30">
+                    <i data-lucide="shield-alert" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xl font-bold tracking-wide text-blue-400">
+                    SecurityScanner
+                </span>
+            </div>
+            <span class="text-xs px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-mono">
+                VirusTotal v3 Entegre
+            </span>
+        </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6 space-y-8">
+
+        <!-- Başlık Alanı -->
+        <section class="text-center space-y-3 mt-4">
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-white">
+                Şüpheli Bağlantı veya Dosyaları Taramaya Başlayın
+            </h1>
+            <p class="text-slate-400 max-w-xl mx-auto text-sm md:text-base">
+                Zararlı yazılım, phishing ve tehdit analizlerini 70+ antivirüs motorunun verilerini tarayarak saniyeler içinde raporlayın.
+            </p>
+        </section>
+
+        <!-- Form Kartı -->
+        <section class="card-bg border rounded-2xl p-6 shadow-xl relative overflow-hidden">
+            <!-- Sekme Butonları -->
+            <div class="flex border-b border-slate-800 mb-6">
+                <button type="button" id="tab-url-btn" onclick="switchTab('url')"
+                    class="flex-1 pb-3 text-center font-medium border-b-2 border-blue-500 text-blue-400 transition-colors flex items-center justify-center space-x-2">
+                    <i data-lucide="link" class="w-4 h-4"></i> <span>URL Taraması</span>
+                </button>
+                <button type="button" id="tab-file-btn" onclick="switchTab('file')"
+                    class="flex-1 pb-3 text-center font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center space-x-2">
+                    <i data-lucide="file-up" class="w-4 h-4"></i> <span>Dosya Taraması (SHA-256)</span>
+                </button>
+            </div>
+
+            <!-- URL Tarama Formu -->
+            <form id="url-form" onsubmit="handleScanURL(event)" class="space-y-4">
+                <div class="relative">
+                    <input type="url" id="url-input" required placeholder="https://example.com/suspicious-link"
+                        class="w-full input-bg border rounded-xl px-4 py-3.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
+                </div>
+                <button type="submit" id="url-submit-btn"
+                    class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3.5 rounded-xl transition flex items-center justify-center space-x-2 shadow-lg">
+                    <i data-lucide="search" class="w-4 h-4"></i> <span>URL Analiz Et</span>
+                </button>
+            </form>
+
+            <!-- Dosya Tarama Formu -->
+            <form id="file-form" onsubmit="handleScanFile(event)" class="space-y-4 hidden">
+                <div class="border-2 border-dashed border-slate-800 rounded-xl p-8 text-center input-bg hover:border-slate-700 transition">
+                    <i data-lucide="upload-cloud" class="w-10 h-10 text-slate-500 mx-auto mb-2"></i>
+                    <p class="text-sm text-slate-300 font-medium mb-1">Analiz Edilecek Dosyayı Seçin</p>
+                    <p class="text-xs text-slate-500 mb-4">SHA-256 Hash değeri otomatik üretilip sorgulanacaktır.</p>
+                    <input type="file" id="file-input" class="hidden" onchange="updateFileName(this)">
+                    <label for="file-input" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-lg cursor-pointer transition inline-block">
+                        Gözat...
+                    </label>
+                    <span id="file-name-display" class="block text-xs text-blue-400 mt-3 font-mono"></span>
+                </div>
+                <button type="submit" id="file-submit-btn"
+                    class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3.5 rounded-xl transition flex items-center justify-center space-x-2 shadow-lg">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i> <span>Dosya Hash Taraması Yap</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- Yükleniyor Göstergesi -->
+        <div id="loading-spinner" class="hidden text-center py-12 space-y-3">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent"></div>
+            <p class="text-slate-400 text-sm font-medium">VirusTotal motorları sorgulanıyor, lütfen bekleyin...</p>
+        </div>
+
+        <!-- Sonuç Paneli -->
+        <section id="result-dashboard" class="hidden space-y-6">
+            <div class="card-bg border rounded-2xl p-6">
+                <!-- Üst Bilgi Başlığı -->
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-slate-800 pb-4 mb-6 gap-4">
+                    <div>
+                        <span id="scan-type-tag" class="text-xs font-mono px-2.5 py-1 bg-slate-800 text-slate-300 rounded-md">
+                            URL ANALİZİ
+                        </span>
+                        <h2 id="target-display" class="text-lg font-bold text-slate-100 mt-2 font-mono break-all">
+                            -
+                        </h2>
+                    </div>
+                    <div id="status-badge" class="px-4 py-2 rounded-xl font-bold text-sm tracking-wider flex items-center space-x-2">
+                        <!-- JS Dinamik Dolduracak -->
+                    </div>
+                </div>
+
+                <!-- Grafik ve İstatistikler -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <!-- Grafik Kutusu -->
+                    <div class="w-48 h-48 mx-auto relative">
+                        <canvas id="scanChart"></canvas>
+                    </div>
+
+                    <!-- İstatistikler -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="input-bg p-4 rounded-xl border border-slate-800">
+                            <span class="text-xs text-red-400 font-medium">Zararlı (Malicious)</span>
+                            <p id="count-malicious" class="text-2xl font-bold text-red-500 mt-1">0</p>
+                        </div>
+                        <div class="input-bg p-4 rounded-xl border border-slate-800">
+                            <span class="text-xs text-yellow-400 font-medium">Şüpheli (Suspicious)</span>
+                            <p id="count-suspicious" class="text-2xl font-bold text-yellow-500 mt-1">0</p>
+                        </div>
+                        <div class="input-bg p-4 rounded-xl border border-slate-800">
+                            <span class="text-xs text-emerald-400 font-medium">Temiz (Harmless)</span>
+                            <p id="count-harmless" class="text-2xl font-bold text-emerald-500 mt-1">0</p>
+                        </div>
+                        <div class="input-bg p-4 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 font-medium">Toplam Motor</span>
+                            <p id="count-total" class="text-2xl font-bold text-slate-300 mt-1">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-4 text-center text-xs text-slate-500 mt-auto">
+        SecurityScanner &copy; 2026 - Threat Intelligence Platform
+    </footer>
+
+    <!-- İstemci Mantığı (JavaScript) -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        });
+
+        let scanChartInstance = null;
+
+        function switchTab(type) {
+            const urlBtn = document.getElementById('tab-url-btn');
+            const fileBtn = document.getElementById('tab-file-btn');
+            const urlForm = document.getElementById('url-form');
+            const fileForm = document.getElementById('file-form');
+
+            if (type === 'url') {
+                urlBtn.className = "flex-1 pb-3 text-center font-medium border-b-2 border-blue-500 text-blue-400 transition-colors flex items-center justify-center space-x-2";
+                fileBtn.className = "flex-1 pb-3 text-center font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center space-x-2";
+                urlForm.classList.remove('hidden');
+                fileForm.classList.add('hidden');
+            } else {
+                fileBtn.className = "flex-1 pb-3 text-center font-medium border-b-2 border-blue-500 text-blue-400 transition-colors flex items-center justify-center space-x-2";
+                urlBtn.className = "flex-1 pb-3 text-center font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center space-x-2";
+                fileForm.classList.remove('hidden');
+                urlForm.classList.add('hidden');
+            }
+        }
+
+        function updateFileName(input) {
+            const fileName = input.files[0] ? input.files[0].name : '';
+            document.getElementById('file-name-display').innerText = fileName ? `Seçilen: ${fileName}` : '';
+        }
+
+        async function handleScanURL(e) {
+            e.preventDefault();
+            const url = document.getElementById('url-input').value;
+            showLoading(true);
+
+            try {
+                const res = await fetch('/api/scan/url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.detail || 'Tarama hatası oluştu');
+                }
+                renderResults(data);
+            } catch (err) {
+                alert("Analiz Hatası: " + err.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function handleScanFile(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('file-input');
+            if (!fileInput.files[0]) {
+                alert("Lütfen bir dosya seçin.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            showLoading(true);
+
+            try {
+                const res = await fetch('/api/scan/file', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.detail || 'Tarama hatası oluştu');
+                }
+                renderResults(data);
+            } catch (err) {
+                alert("Analiz Hatası: " + err.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function showLoading(state) {
+            const spinner = document.getElementById('loading-spinner');
+            const dashboard = document.getElementById('result-dashboard');
+            if (state) {
+                spinner.classList.remove('hidden');
+                dashboard.classList.add('hidden');
+            } else {
+                spinner.classList.add('hidden');
+            }
+        }
+
+        function renderResults(data) {
+            const dashboard = document.getElementById('result-dashboard');
+            dashboard.classList.remove('hidden');
+
+            document.getElementById('scan-type-tag').innerText = `${data.scan_type} ANALİZİ`;
+            document.getElementById('target-display').innerText = data.target;
+
+            document.getElementById('count-malicious').innerText = data.malicious_count;
+            document.getElementById('count-suspicious').innerText = data.suspicious_count;
+            document.getElementById('count-harmless').innerText = data.harmless_count;
+            document.getElementById('count-total').innerText = data.total_scanners;
+
+            // Güvenlik Durumu Rozeti
+            const badge = document.getElementById('status-badge');
+            if (data.status === 'CLEAN') {
+                badge.className = "px-4 py-2 rounded-xl font-bold text-sm bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center space-x-2";
+                badge.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i> <span>GÜVENLİ</span>`;
+            } else if (data.status === 'DANGEROUS') {
+                badge.className = "px-4 py-2 rounded-xl font-bold text-sm bg-red-500/10 text-red-400 border border-red-500/30 flex items-center space-x-2";
+                badge.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4"></i> <span>TEHLİKELİ</span>`;
+            } else if (data.status === 'SUSPICIOUS') {
+                badge.className = "px-4 py-2 rounded-xl font-bold text-sm bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 flex items-center space-x-2";
+                badge.innerHTML = `<i data-lucide="alert-circle" class="w-4 h-4"></i> <span>ŞÜPHELİ</span>`;
+            } else {
+                badge.className = "px-4 py-2 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700 flex items-center space-x-2";
+                badge.innerHTML = `<i data-lucide="help-circle" class="w-4 h-4"></i> <span>BİLİNMİYOR</span>`;
+            }
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            setTimeout(() => {
+                renderChart(data.malicious_count, data.suspicious_count, data.harmless_count);
+            }, 50);
+        }
+
+        function renderChart(malicious, suspicious, harmless) {
+            const canvas = document.getElementById('scanChart');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+
+            if (scanChartInstance) {
+                scanChartInstance.destroy();
+            }
+
+            const total = malicious + suspicious + harmless;
+            const dataValues = total === 0 ? [0, 0, 1] : [malicious, suspicious, harmless];
+
+            scanChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Zararlı', 'Şüpheli', 'Temiz'],
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: ['#ef4444', '#f59e0b', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 500
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+    </script>
+</body>
+</html>
