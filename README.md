@@ -1,4 +1,4 @@
-# 🛡️ SecurityScanner - Threat Intelligence & Security Analysis Portal
+#  SecurityScanner - Threat Intelligence & Security Analysis Portal
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
@@ -9,17 +9,17 @@
 
 ---
 
-## 🚀 Öne Çıkan Özellikler (Key Features)
+##  Öne Çıkan Özellikler (Key Features)
 
-- 🔍 **Canlı URL Analizi:** Girilen bağlantıları VirusTotal v3 REST API altyapısı üzerinden sorgular ve güvenlik durumunu raporlar.
-- 🧬 **SHA-256 Hash Tarama Motoru:** Yüklenen dosyaların kendisi yerine istemci/sunucu tarafında benzersiz `SHA-256` imzasını üreterek sorgulama yapar. Dosya yükleme riski barındırmaz.
-- 📊 **Görsel Tehdit Dashboard'u:** Chart.js ve Tailwind CSS entegrasyonu ile tespit edilen zararlı (Malicious), şüpheli (Suspicious) ve temiz (Harmless) motor sayılarını dinamik pasta grafik ile görselleştirir.
-- ⚡ **Asenkron Mimarisi (`httpx`):** Arka planda yüksek performanslı asenkron HTTP istekleri kullanarak sonuçları hızlıca derler.
-- 🎨 **Siber Güvenlik Konseptli Arayüz:** Karanlık mod (Dark Mode) uyumlu modern arayüz tasarımı.
+-  **Canlı URL Analizi:** Girilen bağlantıları VirusTotal v3 REST API altyapısı üzerinden sorgular ve güvenlik durumunu raporlar.
+-  **SHA-256 Hash Tarama Motoru:** Yüklenen dosyaların kendisi yerine istemci/sunucu tarafında benzersiz `SHA-256` imzasını üreterek sorgulama yapar. Dosya yükleme riski barındırmaz.
+-  **Görsel Tehdit Dashboard'u:** Chart.js ve Tailwind CSS entegrasyonu ile tespit edilen zararlı (Malicious), şüpheli (Suspicious) ve temiz (Harmless) motor sayılarını dinamik pasta grafik ile görselleştirir.
+-  **Asenkron Mimarisi (`httpx`):** Arka planda yüksek performanslı asenkron HTTP istekleri kullanarak sonuçları hızlıca derler.
+-  **Siber Güvenlik Konseptli Arayüz:** Karanlık mod (Dark Mode) uyumlu modern arayüz tasarımı.
 
 ---
 
-## 🛠️ Kullanılan Teknolojiler (Tech Stack)
+##  Kullanılan Teknolojiler (Tech Stack)
 
 * **Backend:** Python 3.10+, FastAPI, Pydantic, HTTPX (Async HTTP Client)
 * **Güvenlik & Kriptografi:** Hashlib (SHA-256), VirusTotal v3 API Entegrasyonu
@@ -28,7 +28,7 @@
 
 ---
 
-## 📁 Proje Klasör Mimarisi (Project Structure)
+## Proje Klasör Mimarisi (Project Structure)
 
 ```text
 SecurityScanner/
