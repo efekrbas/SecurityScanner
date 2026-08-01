@@ -50,7 +50,10 @@ async def scan_url(request: Request, payload: URLScanRequest):
         else:
             try:
                 _, _, ip_addrs = await loop.run_in_executor(None, socket.gethostbyname_ex, hostname)
-                resolved_info = f"IP: {', '.join(ip_addrs)}"
+                if len(ip_addrs) > 1:
+                    resolved_info = f"IP Addresses: {', '.join(ip_addrs)}"
+                else:
+                    resolved_info = f"IP: {ip_addrs[0]}"
             except Exception:
                 pass
     except Exception:
