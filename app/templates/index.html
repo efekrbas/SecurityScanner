@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SecurityScanner - Tehdit Analiz Portalı</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
 
     <!-- Tailwind CSS (Eksiksiz Basit CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -78,7 +79,7 @@
             <!-- URL Tarama Formu -->
             <form id="url-form" onsubmit="handleScanURL(event)" class="space-y-4">
                 <div class="relative">
-                    <input type="url" id="url-input" required placeholder="https://example.com/suspicious-link"
+                    <input type="text" id="url-input" required placeholder="example.com/suspicious-link"
                         class="w-full input-bg border rounded-xl px-4 py-3.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
                 </div>
                 <button type="submit" id="url-submit-btn"
@@ -155,6 +156,15 @@
                             <span class="text-xs text-slate-400 font-medium">Toplam Motor</span>
                             <p id="count-total" class="text-2xl font-bold text-slate-300 mt-1">0</p>
                         </div>
+                    </div>
+                </div>
+                <!-- Motor Detayları -->
+                <div id="engine-details-container" class="mt-6 border-t border-slate-800 pt-6 hidden">
+                    <h3 class="text-sm font-medium text-slate-300 mb-4 flex items-center space-x-2">
+                        <i data-lucide="shield-alert" class="w-4 h-4"></i> <span>Zararlı / Şüpheli Algılayan Motorlar</span>
+                    </h3>
+                    <div id="engine-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <!-- JS Dinamik Dolduracak -->
                     </div>
                 </div>
             </div>
@@ -292,6 +302,31 @@
             } else {
                 badge.className = "px-4 py-2 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 border border-slate-700 flex items-center space-x-2";
                 badge.innerHTML = `<i data-lucide="help-circle" class="w-4 h-4"></i> <span>BİLİNMİYOR</span>`;
+            }
+
+            // Motor Detaylarını Listeleme
+            const engineContainer = document.getElementById('engine-details-container');
+            const engineList = document.getElementById('engine-list');
+            engineList.innerHTML = '';
+            
+            if (data.engine_details && Object.keys(data.engine_details).length > 0) {
+                engineContainer.classList.remove('hidden');
+                for (const [engine, category] of Object.entries(data.engine_details)) {
+                    let colorClass = category === 'malicious' ? 'text-red-400 bg-red-500/10 border-red-500/20' : 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20';
+                    let iconName = category === 'malicious' ? 'alert-triangle' : 'alert-circle';
+                    let label = category === 'malicious' ? 'Zararlı' : 'Şüpheli';
+                    
+                    engineList.innerHTML += `
+                        <div class="flex items-center justify-between p-3 rounded-lg border ${colorClass}">
+                            <span class="font-medium text-sm text-slate-200">${engine}</span>
+                            <span class="text-xs font-bold flex items-center space-x-1">
+                                <i data-lucide="${iconName}" class="w-3 h-3"></i> <span>${label}</span>
+                            </span>
+                        </div>
+                    `;
+                }
+            } else {
+                engineContainer.classList.add('hidden');
             }
 
             if (window.lucide) {

@@ -12,9 +12,18 @@ router = APIRouter(prefix="/api/scan", tags=["Scanner"])
 @router.post("/url", response_model=ScanResultResponse)
 @limiter.limit("10/minute")
 async def scan_url(request: Request, payload: URLScanRequest):
-    result = await scan_url_virustotal(payload.url)
+    # Kullanıcı arayüzünde tam olarak kullanıcının yazdığı halini göstermek için orijinali saklıyoruz
+    display_target = payload.url
+    
+    # VirusTotal API bir "URL" beklediği için arka planda (kullanıcıya çaktırmadan) HTTP protokolü ekliyoruz.
+    # Güvenlik (OPSEC) gereği sunucumuzdan hedef siteye test isteği (ping) ATMIYORUZ.
+    vt_scan_url = display_target
+    if not vt_scan_url.startswith(('http://', 'https://')):
+        vt_scan_url = f"http://{vt_scan_url}"
+
+    result = await scan_url_virustotal(vt_scan_url)
     return ScanResultResponse(
-        target=payload.url,
+        target=display_target,  # Ekrana basılacak olan (örn: efekrbs.com.tr)
         scan_type="URL",
         status=result.get("status", "CLEAN"),
         malicious_count=result.get("malicious_count", 0),
