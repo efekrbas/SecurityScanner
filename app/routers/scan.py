@@ -25,9 +25,7 @@ async def scan_url(request: Request, payload: URLScanRequest):
     if not vt_scan_url.startswith(('http://', 'https://')):
         vt_scan_url = f"http://{vt_scan_url}"
 
-    result = await scan_url_virustotal(vt_scan_url)
-
-    # DNS Çözümleme (IP -> Domain veya Domain -> IP)
+    # DNS Çözümleme ve Doğrulama
     resolved_info = None
     try:
         parsed_url = urlparse(vt_scan_url)
@@ -46,7 +44,7 @@ async def scan_url(request: Request, payload: URLScanRequest):
                 domain_name, _, _ = await loop.run_in_executor(None, socket.gethostbyaddr, hostname)
                 resolved_info = f"Alan Adı: {domain_name}"
             except Exception:
-                pass
+                resolved_info = "Alan Adı: Bulunamadı (Kayıt Yok)"
         else:
             try:
                 _, _, ip_addrs = await loop.run_in_executor(None, socket.gethostbyname_ex, hostname)
@@ -55,9 +53,13 @@ async def scan_url(request: Request, payload: URLScanRequest):
                 else:
                     resolved_info = f"IP: {ip_addrs[0]}"
             except Exception:
-                pass
+                raise HTTPException(status_code=400, detail="Geçersiz Alan Adı: Böyle bir site bulunamadı veya aktif değil.")
+    except HTTPException:
+        raise
     except Exception:
         pass
+
+    result = await scan_url_virustotal(vt_scan_url)
 
     return ScanResultResponse(
         target=display_target,  # Ekrana basılacak olan (örn: efekrbs.com.tr)
