@@ -230,7 +230,11 @@
 
                 const data = await res.json();
                 if (!res.ok) {
-                    throw new Error(data.detail || 'Tarama hatası oluştu');
+                    let errMsg = 'Tarama hatası oluştu';
+                    if (data.detail) {
+                        errMsg = typeof data.detail === 'string' ? data.detail : data.detail.map(e => e.msg.replace('Value error, ', '')).join(', ');
+                    }
+                    throw new Error(errMsg);
                 }
                 renderResults(data);
             } catch (err) {
@@ -260,7 +264,11 @@
 
                 const data = await res.json();
                 if (!res.ok) {
-                    throw new Error(data.detail || 'Tarama hatası oluştu');
+                    let errMsg = 'Tarama hatası oluştu';
+                    if (data.detail) {
+                        errMsg = typeof data.detail === 'string' ? data.detail : data.detail.map(e => e.msg.replace('Value error, ', '')).join(', ');
+                    }
+                    throw new Error(errMsg);
                 }
                 renderResults(data);
             } catch (err) {
