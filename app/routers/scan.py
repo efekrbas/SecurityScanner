@@ -44,7 +44,7 @@ async def scan_url(request: Request, payload: URLScanRequest):
         if is_ip:
             try:
                 domain_name, _, _ = await loop.run_in_executor(None, socket.gethostbyaddr, hostname)
-                resolved_info = f"Domain: {domain_name}"
+                resolved_info = f"Alan Adı: {domain_name}"
             except Exception:
                 pass
         else:
