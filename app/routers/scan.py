@@ -4,6 +4,10 @@ from slowapi.util import get_remote_address
 from app.models.scanner import URLScanRequest, ScanResultResponse
 from app.services.virustotal import scan_url_virustotal, scan_file_hash_virustotal
 from app.services.hasher import calculate_file_hash_async
+import socket
+import asyncio
+from urllib.parse import urlparse
+import ipaddress
 
 limiter = Limiter(key_func=get_remote_address)
 router = APIRouter(prefix="/api/scan", tags=["Scanner"])
@@ -22,6 +26,36 @@ async def scan_url(request: Request, payload: URLScanRequest):
         vt_scan_url = f"http://{vt_scan_url}"
 
     result = await scan_url_virustotal(vt_scan_url)
+
+    # DNS Çözümleme (IP -> Domain veya Domain -> IP)
+    resolved_info = None
+    try:
+        parsed_url = urlparse(vt_scan_url)
+        hostname = parsed_url.hostname or display_target
+        hostname = hostname.split(':')[0] # portu temizle
+        
+        try:
+            ipaddress.ip_address(hostname)
+            is_ip = True
+        except ValueError:
+            is_ip = False
+
+        loop = asyncio.get_event_loop()
+        if is_ip:
+            try:
+                domain_name, _, _ = await loop.run_in_executor(None, socket.gethostbyaddr, hostname)
+                resolved_info = f"Domain: {domain_name}"
+            except Exception:
+                pass
+        else:
+            try:
+                ip_addr = await loop.run_in_executor(None, socket.gethostbyname, hostname)
+                resolved_info = f"IP: {ip_addr}"
+            except Exception:
+                pass
+    except Exception:
+        pass
+
     return ScanResultResponse(
         target=display_target,  # Ekrana basılacak olan (örn: efekrbs.com.tr)
         scan_type="URL",
@@ -30,6 +64,7 @@ async def scan_url(request: Request, payload: URLScanRequest):
         suspicious_count=result.get("suspicious_count", 0),
         harmless_count=result.get("harmless_count", 1),
         total_scanners=result.get("total_scanners", 1),
+        resolved_ip=resolved_info,
         engine_details=result.get("engine_details", {})
     )
 

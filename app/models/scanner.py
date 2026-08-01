@@ -28,4 +28,5 @@ class ScanResultResponse(BaseModel):
     suspicious_count: int
     harmless_count: int
     total_scanners: int
+    resolved_ip: str | None = None
     engine_details: dict = {}  # Motor detaylarını ekrana basmak için (Örn: {"Kaspersky": "malicious"})

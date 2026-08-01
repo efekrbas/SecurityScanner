@@ -125,6 +125,7 @@
                         <h2 id="target-display" class="text-lg font-bold text-slate-100 mt-2 font-mono break-all">
                             -
                         </h2>
+                        <p id="resolved-ip-display" class="text-xs text-blue-400 font-mono mt-1 hidden"></p>
                     </div>
                     <div id="status-badge" class="px-4 py-2 rounded-xl font-bold text-sm tracking-wider flex items-center space-x-2">
                         <!-- JS Dinamik Dolduracak -->
@@ -286,6 +287,14 @@
 
             document.getElementById('scan-type-tag').innerText = `${data.scan_type} ANALİZİ`;
             document.getElementById('target-display').innerText = data.target;
+
+            const ipDisplay = document.getElementById('resolved-ip-display');
+            if (data.resolved_ip) {
+                ipDisplay.innerText = data.resolved_ip;
+                ipDisplay.classList.remove('hidden');
+            } else {
+                ipDisplay.classList.add('hidden');
+            }
 
             document.getElementById('count-malicious').innerText = data.malicious_count;
             document.getElementById('count-suspicious').innerText = data.suspicious_count;
