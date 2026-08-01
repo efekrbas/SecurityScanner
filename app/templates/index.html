@@ -192,6 +192,10 @@
             const fileBtn = document.getElementById('tab-file-btn');
             const urlForm = document.getElementById('url-form');
             const fileForm = document.getElementById('file-form');
+            const dashboard = document.getElementById('result-dashboard');
+
+            // Tab değiştiğinde eski sonucu gizle
+            dashboard.classList.add('hidden');
 
             if (type === 'url') {
                 urlBtn.className = "flex-1 pb-3 text-center font-medium border-b-2 border-blue-500 text-blue-400 transition-colors flex items-center justify-center space-x-2";
